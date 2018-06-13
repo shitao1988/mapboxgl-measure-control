@@ -9,7 +9,7 @@
 
 
 function MeasureControl(options) {
-    this.options = Object.assign({},  MeasureControl.DEFAULTS, options);
+    this.options = Object.assign({}, MeasureControl.DEFAULTS, options);
 
     //不能删除 不然会报错的
     this._onClick = this._onClick.bind(this);
@@ -44,17 +44,17 @@ MeasureControl.prototype.onAdd = function(map) {
 
     //储存可能冲突的事件
     this.events = {};
-    
+
     this._map.on('click', this._onClick);
     this._map.on('dblclick', this._onDblClick);
     this._map.on('mousemove', this._onMousemove);
 
-    this._measureOnButton = this._createNode('button','mapboxgl-ctrl-icon mapboxgl-ctrl-measure-off','',this._container, 'measure-off',this._onMeasureStart);
+    this._measureOnButton = this._createNode('button', 'mapboxgl-ctrl-icon mapboxgl-ctrl-measure-off', '', this._container, 'measure-off', this._onMeasureStart);
     return this._container;
 };
 
 MeasureControl.DEFAULTS = {
-    linestring : {
+    linestring: {
         "type": "Feature",
         "geometry": {
             "type": "LineString",
@@ -66,7 +66,7 @@ MeasureControl.DEFAULTS = {
     lineColor: '#44bff0',
     lineWidth: 3,
     lineCap: 'round',
-    lineJoin: 'round', 
+    lineJoin: 'round',
 };
 
 /**
@@ -85,7 +85,7 @@ MeasureControl.prototype.onRemove = function() {
  * ['top-left','top-right','bottom-left','bottom-right']
  * @returns 
  */
-MeasureControl.prototype.getDefaultPosition = function(){
+MeasureControl.prototype.getDefaultPosition = function() {
     return 'top-left';
 }
 
@@ -97,20 +97,20 @@ MeasureControl.prototype.getDefaultPosition = function(){
  * @param {func} fn click事件触发的方法
  * @returns {node}
  */
-MeasureControl.prototype._createNode = function(node,className,textContent,container, ariaLabel, fn){
+MeasureControl.prototype._createNode = function(node, className, textContent, container, ariaLabel, fn) {
     var a = document.createElement(node);
     a.className = className;
     a.textContent = textContent;
-    a.setAttribute('aria-label',ariaLabel);
-    if(fn) a.addEventListener('click', fn);
+    a.setAttribute('aria-label', ariaLabel);
+    if (fn) a.addEventListener('click', fn);
     container.appendChild(a);
-    
+
     return a;
 }
 
 MeasureControl.prototype._removeNode = function(node, fn) {
     node.remove();
-    if(fn) node.removeEventListener('click', fn);
+    if (fn) node.removeEventListener('click', fn);
 }
 
 
@@ -118,9 +118,9 @@ MeasureControl.prototype._removeNode = function(node, fn) {
  * @description map的click事件
  * @param {any} e
  */
-MeasureControl.prototype._onClick = function(e){
-    
-    if(this.state === 'off') return;
+MeasureControl.prototype._onClick = function(e) {
+
+    if (this.state === 'off') return;
 
     var map = this._map;
     var features = map.queryRenderedFeatures(e.point, { layers: ['measure-points-' + this._name] });
@@ -143,10 +143,10 @@ MeasureControl.prototype._onClick = function(e){
     };
 
     this.curGeojson.features.push(point);
-        
+
     //画线
     var PointList = this._getPointsList();
-    if(PointList.length >=2) {
+    if (PointList.length >= 2) {
         this.lineString.geometry.coordinates = PointList.map(function(point) {
             return point.geometry.coordinates;
         });
@@ -159,7 +159,7 @@ MeasureControl.prototype._onClick = function(e){
         var last = this.curGeojson.features.length - 1;
         this.curGeojson.features[last].properties.curDistance = this.curDis;
         this.curGeojson.features[last].properties.prevDistance = this.prevDis;
-        
+
         this.curGeojson.features.push(this.lineString);
     }
 
@@ -168,7 +168,7 @@ MeasureControl.prototype._onClick = function(e){
 
     //每个point绑定popup
     this._bindPointPopup(PointList);
-     
+
 }
 
 /**
@@ -177,7 +177,7 @@ MeasureControl.prototype._onClick = function(e){
  * @param {unit} 测量单位
  * @return {Number} 距离
  */
-MeasureControl.prototype._getLineDistance = function(lineString,unit) {
+MeasureControl.prototype._getLineDistance = function(lineString, unit) {
     return turf.lineDistance(lineString, unit).toLocaleString();
 }
 
@@ -185,7 +185,7 @@ MeasureControl.prototype._getLineDistance = function(lineString,unit) {
  * @description 获取所有的Point geojson格式
  * @return {Array} Point数组
  */
-MeasureControl.prototype._getPointsList = function(){
+MeasureControl.prototype._getPointsList = function() {
     return this.curGeojson.features.filter(function(item) {
         return item.geometry.type === 'Point';
     });
@@ -195,8 +195,8 @@ MeasureControl.prototype._getPointsList = function(){
  * @description 删除当前测距实例的popups
  * @param {string} name 当前测距实例的名字
  */
-MeasureControl.prototype._removeCurPopups = function(name){
-    this.geojsonList[name].popups.map(function(popup){
+MeasureControl.prototype._removeCurPopups = function(name) {
+    this.geojsonList[name].popups.map(function(popup) {
         popup.remove();
     });
 }
@@ -208,7 +208,7 @@ MeasureControl.prototype._removeCurPopups = function(name){
 MeasureControl.prototype._bindPointPopup = function(list) {
 
     var _this = this;
-    
+
     //清除原先所有的popup
     this._removeCurPopups(this._name);
 
@@ -217,12 +217,12 @@ MeasureControl.prototype._bindPointPopup = function(list) {
 
         var popup = new mapboxgl.Popup({
                 closeButton: false,
-                closeOnClick: false, 
-                total:point.properties.curDistance, 
+                closeOnClick: false,
+                total: point.properties.curDistance,
                 prev: point.properties.prevDistance
             })
             .setLngLat(point.geometry.coordinates)
-            .setHTML("总距离：" +point.properties.curDistance + "km")
+            .setHTML("距离：" + point.properties.curDistance + "km")
             .addTo(this.map);
 
         popup._container.className += ' mapbox-measure-popup';
@@ -236,61 +236,66 @@ MeasureControl.prototype._bindPointPopup = function(list) {
  * @description map的dblClick事件
  * @param {any} e
  */
-MeasureControl.prototype._onDblClick = function(e){
+MeasureControl.prototype._onDblClick = function(e) {
 
-    if(this.state === 'off') return;
-
+    if (this.state === 'off') return;
+    this.point = null;
     this._toggleState('off');
-    this._toggleEvents('add','click');
-     this._measureOnButton.setAttribute('aria-label','measure-off');
+    this._toggleEvents('add', 'click');
+    this._measureOnButton.setAttribute('aria-label', 'measure-off');
     this._measureOnButton.className = "mapboxgl-ctrl-icon mapboxgl-ctrl-measure-off";
 
     //删除鼠标跟随tips
     this._removeNode(this.tips);
     //修改鼠标手势
     this._toggleCursor('-webkit-grab');
-    
+
     //创建删除当前测距的button
     var length = this.geojsonList[this._name].popups.length;
     var options = this.geojsonList[this._name].popups[length - 1].options;
-    this.geojsonList[this._name].popups[length - 1].setHTML("<div>总距离：" + options.total + "<button data-name='"+this._name+"' id='dele-btn-"+this._name+"'>X</button></div>");
-    document.getElementById('dele-btn-'+this._name).addEventListener('click', this._removeMeasure);
-    
+    this.geojsonList[this._name].popups[length - 1].setHTML("<div>总距离：" + options.total + "<button data-name='" + this._name + "' id='dele-btn-" + this._name + "'>X</button></div>");
+    document.getElementById('dele-btn-' + this._name).addEventListener('click', this._removeMeasure);
+
 }
 
 /**
  * @description 删除当前name的Measure实例
  */
-MeasureControl.prototype._removeMeasure = function(e){
+MeasureControl.prototype._removeMeasure = function(e) {
     var name = e.target.getAttribute('data-name');
     var map = this._map;
-    map.removeSource('measure-geojson-'+ name);
     map.removeLayer('measure-points-' + name);
     map.removeLayer('measure-lines-' + name);
+    this._map.getSource('measure-geojson-mousemove').setData({
+        "type": "FeatureCollection",
+        "features": []
+    });
+    map.removeSource('measure-geojson-' + name);
+
 
     //删除当前name的所有的popup
     this._removeCurPopups(name);
 
     //删除当前name的geojson对象
     delete this.geojsonList[name];
-   
+
 }
 
 /**
  * @description map的点击测距按钮事件，进入测距模式，删除map的其他点击事件，禁用map的双击放大效果
  * @param {any} e
  */
-MeasureControl.prototype._onMeasureStart = function(e){
-    
-    if(this.state === 'on') return;
+MeasureControl.prototype._onMeasureStart = function(e) {
+
+    if (this.state === 'on') return;
 
     //进入测距模式
     this._toggleState('on');
-    this._measureOnButton.setAttribute('aria-label','measure-on');
+    this._measureOnButton.setAttribute('aria-label', 'measure-on');
     this._measureOnButton.className = "mapboxgl-ctrl-icon mapboxgl-ctrl-measure-on";
 
     //禁用map的其他click事件
-    this._toggleEvents('remove','click');
+    this._toggleEvents('remove', 'click');
     //初始化总距离、之前的距离
     this.prevDis = 0.0;
     this.curDis = 0.0;
@@ -303,7 +308,7 @@ MeasureControl.prototype._onMeasureStart = function(e){
 
     //设置当前测距实例的唯一key
     this._name = String(new Date().getTime());
-    
+
     //创建当前测距的mapSource、mapLayer
     this._onAddSourceLayer(e);
 
@@ -313,12 +318,12 @@ MeasureControl.prototype._onMeasureStart = function(e){
  * @description 创建鼠标跟随提示框
  * @param {event} 鼠标点击事件
  */
-MeasureControl.prototype._onAddMouseTips = function(e){
-    var tips = this.tips =  this._createNode('div','measure_mousemove_tips','单击确定起点',document.body,'mousemove_tips');
+MeasureControl.prototype._onAddMouseTips = function(e) {
+    var tips = this.tips = this._createNode('div', 'measure_mousemove_tips', '单击确定起点', document.body, 'mousemove_tips');
     //设置tips的样式
     tips.style.position = 'absolute';
-    this._setTipsPosition(e,tips);
-    
+    this._setTipsPosition(e, tips);
+
     return tips;
 }
 
@@ -327,7 +332,7 @@ MeasureControl.prototype._onAddMouseTips = function(e){
  * @param {event} 鼠标移动事件
  * @param {tips} tips对应的dom元素
  */
-MeasureControl.prototype._setTipsPosition = function(e,tips){
+MeasureControl.prototype._setTipsPosition = function(e, tips) {
     var x = e.pageX || e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft);
     var y = e.pageY || e.clientY + (document.documentElement.scrollLeft || document.body.scrollLeft);
     tips.style.left = x + 10 + 'px';
@@ -342,7 +347,7 @@ MeasureControl.prototype._setTipsPosition = function(e,tips){
 /**
  * @description 创建MeasureControl的mapSource、mapLayer
  */
-MeasureControl.prototype._onAddSourceLayer = function(){
+MeasureControl.prototype._onAddSourceLayer = function() {
     //样式
     var circleRadius = this.options.circleRadius;
     var circleColor = this.options.circleColor;
@@ -369,13 +374,36 @@ MeasureControl.prototype._onAddSourceLayer = function(){
     });
 
     //dataSource
-    this._map.addSource('measure-geojson-mousemove', {
-        "type": "geojson",
-        "data":  {
+    if (!this._map.getSource('measure-geojson-mousemove')) {
+        this._map.addSource('measure-geojson-mousemove', {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": []
+            }
+        });
+        //mouseover线图层
+
+        this._map.addLayer({
+            id: 'measure-lines-mousemove',
+            type: 'line',
+            source: 'measure-geojson-mousemove',
+            layout: {
+                'line-cap': lineCap,
+                'line-join': lineJoin
+            },
+            paint: {
+                'line-color': lineColor,
+                'line-width': lineWidth
+            },
+        });
+    } else {
+        this._map.getSource('measure-geojson-mousemove').setData({
             "type": "FeatureCollection",
             "features": []
-        }
-    });
+        });
+    }
+
     //线图层
     this._map.addLayer({
         id: 'measure-lines-' + this._name,
@@ -406,24 +434,10 @@ MeasureControl.prototype._onAddSourceLayer = function(){
         filter: ['in', '$type', 'Point']
     });
 
-    //mouseover线图层
 
-    this._map.addLayer({
-        id: 'measure-lines-mousemove',
-        type: 'line',
-        source: 'measure-geojson-mousemove',
-        layout: {
-            'line-cap': lineCap,
-            'line-join': lineJoin
-        },
-        paint: {
-            'line-color': lineColor,
-            'line-width': lineWidth
-        },
-    });
 
-     //保存所有的测绘feature、popup
-    this.geojsonList[this._name] = {geojson: this.curGeojson,popups: []};
+    //保存所有的测绘feature、popup
+    this.geojsonList[this._name] = { geojson: this.curGeojson, popups: [] };
 }
 
 
@@ -431,7 +445,7 @@ MeasureControl.prototype._onAddSourceLayer = function(){
  * @description map的点击测距按钮事件，结束测距模式
  * @param {any} e
  */
-MeasureControl.prototype._onMeasureEnd = function(e){
+MeasureControl.prototype._onMeasureEnd = function(e) {
     console.log('结束测距模式');
     this._toggleState('off');
 
@@ -441,13 +455,13 @@ MeasureControl.prototype._onMeasureEnd = function(e){
  * @description map的mousemove事件
  * @param {any} e
  */
-MeasureControl.prototype._onMousemove = function(e){
+MeasureControl.prototype._onMousemove = function(e) {
 
-    if(this.state === 'off') return;
+    if (this.state === 'off') return;
 
     //更新tips的位置
-    this._setTipsPosition(e.originalEvent,this.tips);
-    if(!this.point) return;
+    this._setTipsPosition(e.originalEvent, this.tips);
+    if (!this.point) return;
 
     //鼠标当前位置点
     var point = {
@@ -465,21 +479,21 @@ MeasureControl.prototype._onMousemove = function(e){
         "type": "Feature",
         "geometry": {
             "type": "LineString",
-            "coordinates": [curcoord,[e.lngLat.lng, e.lngLat.lat]]
+            "coordinates": [curcoord, [e.lngLat.lng, e.lngLat.lat]]
         }
     };
 
     //测距鼠标位置和最后一个Point之间的距离
     var distance = this._getLineDistance(lineString, 'kilometers');
     //创建移动的线图层
-    if((distance - 0) === 0) return;
+    if ((distance - 0) === 0) return;
 
     this._map.getSource('measure-geojson-mousemove').setData({
         "type": "FeatureCollection",
         "features": [lineString]
     });
 
-    this.tips.innerText = '当前距离：'+ distance + 'km\n单击继续，双击结束测距';
+    this.tips.innerText = '当前距离：' + distance + 'km\n单击继续，双击结束测距';
 }
 
 /**
@@ -490,9 +504,9 @@ MeasureControl.prototype._onMousemove = function(e){
 MeasureControl.prototype._toggleState = function(state) {
     this.state = state;
     //禁用map双击放大效果
-    if(state === 'on') {
+    if (state === 'on') {
         this._map.doubleClickZoom.disable();
-    }else {
+    } else {
         this._map.doubleClickZoom.enable();
     }
 }
@@ -510,31 +524,31 @@ MeasureControl.prototype._toggleCursor = function(cursor) {
  * @param {string} 是否防冲突
  * @param {string} 事件名称
  */
-MeasureControl.prototype._toggleEvents = function(toggle,event) {
+MeasureControl.prototype._toggleEvents = function(toggle, event) {
     var _this = this;
-    
+
     //假如没有储存对应event的事件
-    if(!this.events[event]) {
+    if (!this.events[event]) {
         this.events[event] = [];
         this._map._listeners[event].map(function(item, index) {
-            if(item.name !== 'bound ') {
+            if (item.name !== 'bound ') {
                 _this.events[event].push(item);
             }
-        });    
-    } 
+        });
+    }
 
-    if(this.events[event].length === 0) return;
+    if (this.events[event].length === 0) return;
 
     //off其他不相关的event事件
-    if(toggle === 'remove') {
-        this.events[event].map(function(item, index){
+    if (toggle === 'remove') {
+        this.events[event].map(function(item, index) {
             _this._map.off(event, item);
         });
-    }else if(toggle === 'add') {
+    } else if (toggle === 'add') {
         //重新监听所有event事件
-        this.events[event].map(function(item, index){
+        this.events[event].map(function(item, index) {
             _this._map.on(event, item);
         });
     }
-    
+
 }
